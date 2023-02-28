@@ -9,23 +9,23 @@ dotenv.config()
 const router = express.Router()
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINRAY_CLOUD_NAME,
-  api_key: process.env.CLOUDINRAY_API_KEY,
-  api_secret: process.env.CLOUDINRAY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-// GET ALL POSTS
 router.route('/').get(async (req, res) => {
   try {
     const posts = await Post.find({})
-
-    res.status(200).json({ sucess: true, data: posts })
-  } catch (error) {
-    res.status(500).json({ sucess: false, message: error })
+    res.status(200).json({ success: true, data: posts })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Не получилось загрузить посты. Пожалуйста, попробуйте ещё раз.',
+    })
   }
 })
 
-// CREATE A POST
 router.route('/').post(async (req, res) => {
   try {
     const { name, prompt, photo } = req.body
@@ -37,9 +37,12 @@ router.route('/').post(async (req, res) => {
       photo: photoUrl.url,
     })
 
-    res.status(201).json({ sucess: true, data: newPost })
-  } catch (error) {
-    res.status(500).json({ sucess: false, message: error })
+    res.status(200).json({ success: true, data: newPost })
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Не получилось создать пост, пожалуйста, повторите попытку.',
+    })
   }
 })
 

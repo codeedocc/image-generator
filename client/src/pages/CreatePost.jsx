@@ -50,7 +50,32 @@ const CreatePost = () => {
     }
   }
 
-  const handleSubmit = async (e) => {}
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (form.prompt && form.photo) {
+      setLoading(true)
+
+      try {
+        const respose = await fetch('http://localhost:8080/api/v1/post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(form),
+        })
+
+        await respose.json()
+        navigate('/')
+      } catch (error) {
+        alert(error)
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      alert('Пожалуйста, введите свойства и сгенерируйте картинку.')
+    }
+  }
 
   return (
     <section className="max-w-7xl mx-auto">
