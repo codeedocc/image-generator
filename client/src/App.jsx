@@ -1,4 +1,3 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { logo } from './assets'
 import CreatePost from './pages/CreatePost'
 
