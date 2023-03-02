@@ -1,21 +1,17 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-
 import { preview } from '../assets'
 import { getRandomPrompt } from '../utils'
 import { FormField, Loader } from '../components'
+import { download } from '../assets'
+import { downloadImage } from '../utils'
 
 const CreatePost = () => {
-  const navigate = useNavigate()
-
+  const [generatingImg, setGeneratingImg] = useState(false)
   const [form, setForm] = useState({
     name: '',
     prompt: '',
     photo: '',
   })
-
-  const [generatingImg, setGeneratingImg] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -25,7 +21,9 @@ const CreatePost = () => {
     setForm({ ...form, prompt: randomPrompt })
   }
 
-  const generateImage = async () => {
+  const generateImage = async (e) => {
+    e.preventDefault()
+
     if (form.prompt) {
       try {
         setGeneratingImg(true)
@@ -50,53 +48,10 @@ const CreatePost = () => {
     }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (form.prompt && form.photo) {
-      setLoading(true)
-
-      try {
-        const respose = await fetch('http://localhost:8080/api/v1/post', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(form),
-        })
-
-        await respose.json()
-        navigate('/')
-      } catch (error) {
-        alert(error)
-      } finally {
-        setLoading(false)
-      }
-    } else {
-      alert('Пожалуйста, введите свойства и сгенерируйте картинку.')
-    }
-  }
-
   return (
-    <section className="max-w-7xl mx-auto">
-      <div>
-        <h1 className="font-extrabold text-[#222328] text-[32px]">Создать</h1>
-        <p className="mt-2 text-[#666e75] text-[14px] max-w-[500px]">
-          Сгенерируйте коллекцию картинок с помощью DALL-E AI.
-        </p>
-      </div>
-
-      <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
+    <section className="max-w-2xl mx-auto">
+      <form className="max-w-3xl" onSubmit={generateImage}>
         <div className="flex flex-col gap-5">
-          <FormField
-            labelName="Ваше имя"
-            type="text"
-            name="name"
-            placeholder="Начните печатать..."
-            value={form.name}
-            handleChange={handleChange}
-          />
-
           <FormField
             labelName="Свойства"
             type="text"
@@ -108,13 +63,39 @@ const CreatePost = () => {
             handleSurpriseMe={handleSurpriseMe}
           />
 
-          <div className="relative bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-64 p-3 h-64 flex justify-center items-center">
+          <div className="relative bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-3 h-full flex justify-center items-center">
             {form.photo ? (
-              <img
-                src={form.photo}
-                alt={form.prompt}
-                className="w-full h-full object-contain"
-              />
+              <div className="rounded-xl group relative shadow-card hover:shadow-cardhover card">
+                <img
+                  src={form.photo}
+                  alt={form.prompt}
+                  className="w-full h-full object-contain relative shadow-card hover:shadow-cardhover card rounded-xl"
+                />
+                <div className="group-hover:flex flex-col  hidden absolute bottom-0 left-0 right-0 bg-[#10131f] m-2 p-4 rounded-md">
+                  <div className="p-4 flex justify-between items-center gap-2">
+                    <p className="text-white text-md overflow-y-auto prompt">
+                      {form.prompt}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        downloadImage(
+                          Math.floor(Math.random() * Date.now()),
+                          form.photo
+                        )
+                      }
+                      className="outline-none bg-transparent border-none"
+                    >
+                      <img
+                        src={download}
+                        alt="download"
+                        className="w-6 h-6 object-contain invert"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <img
                 src={preview}
@@ -131,25 +112,12 @@ const CreatePost = () => {
           </div>
         </div>
 
-        <div className="mt-5 flex gap-5">
-          <button
-            type="button"
-            onClick={generateImage}
-            className=" text-white bg-green-700 font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-          >
-            {generatingImg ? 'Генерируем...' : 'Сгенерировать'}
-          </button>
-        </div>
-
-        <div className="mt-10">
-          <p className="mt-2 text-[#666e75] text-[14px]">
-            Вы создали картинку - можно поделиться ей с остальными.
-          </p>
+        <div className="mt-5 flex gap-5 justify-center">
           <button
             type="submit"
-            className="mt-3 text-white bg-[#6469ff] font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+            className=" text-white bg-green-700 font-medium rounded-md text-sm w-full sm:w-auto px-5 py-2.5 text-center "
           >
-            {loading ? 'Загружаем в сообщество...' : 'Поделиться с остальными'}
+            {generatingImg ? 'Подождите...' : 'Создать'}
           </button>
         </div>
       </form>
